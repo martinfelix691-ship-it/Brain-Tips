@@ -1,10 +1,13 @@
 export default async function handler(request, response) {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Africa/Lagos"
+    }).format(new Date());
 
     const apiResponse = await fetch(
       `https://v3.football.api-sports.io/fixtures?date=${today}`,
       {
+        method: "GET",
         headers: {
           "x-apisports-key": process.env.API_FOOTBALL_KEY
         }
