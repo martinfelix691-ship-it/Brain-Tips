@@ -1,6 +1,24 @@
 export default async function handler(request, response) {
-  response.status(200).json({
-    status: "Brain Tips backend ready",
-    message: "Football API connection will be added next."
-  });
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    const apiResponse = await fetch(
+      `https://v3.football.api-sports.io/fixtures?date=${today}`,
+      {
+        headers: {
+          "x-apisports-key": process.env.API_FOOTBALL_KEY
+        }
+      }
+    );
+
+    const data = await apiResponse.json();
+
+    response.status(apiResponse.status).json(data);
+
+  } catch (error) {
+    response.status(500).json({
+      error: "Failed to connect to Football API",
+      details: error.message
+    });
+  }
 }
