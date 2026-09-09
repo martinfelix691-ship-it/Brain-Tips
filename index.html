@@ -4,12 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Brain Tips</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .controls {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .match {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 12px;
+    }
+
+    #status {
+      margin: 15px 0;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
+
   <h1>⚽ Brain Tips</h1>
   <p>Football Prediction & Analysis</p>
 
-  <button>Generate Ticket</button>
+  <div class="controls">
+    <button onclick="loadFixtures()">🔄 Load Today's Fixtures</button>
+  </div>
+
+  <div id="status">Ready.</div>
+
+  <div id="fixtures"></div>
+
+  <script>
+    async function loadFixtures() {
+      const status = document.getElementById("status");
+      const fixtures = document.getElementById("fixtures");
+
+      status.textContent = "Loading real fixtures...";
+      fixtures.innerHTML = "";
+
+      try {
+        const response = await fetch("/api/football");
+
+        if (!response.ok) {
+          throw new Error("Server error: " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!data.response || data.response.length === 0) {
+          status.textContent = "No fixtures found for today.";
+          return;
+        }
+
+        status.textContent =
+          data.response.length + " fixtures found.";
+
+        data.response.forEach(item => {
+          const match = document.createElement("div");
+          match.className = "match";
+
+          match.innerHTML = `
+            <strong>
+              ${item.teams.home.name}
+              vs
+              ${item.teams.away.name}
+            </strong>
+            <br>
+            ${item.league.name}
+            <br>
+            ${new Date(item.fixture.date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            })}
+          `;
+
+          fixtures.appendChild(match);
+        });
+
+      } catch (error) {
+        status.textContent =
+          "❌ Could not load fixtures: " + error.message;
+      }
+    }
+  </script>
+
 </body>
 </html>
